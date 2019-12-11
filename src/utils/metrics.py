@@ -1,5 +1,5 @@
 import numpy as np
-
+from collections import defaultdict
 EPSILON = 1e-10
 
 
@@ -265,7 +265,7 @@ METRICS = {
     'me': me,
     'mae': mae,
     'mad': mad,
-    'gmae': gmae,
+    # 'gmae': gmae,
     'mdae': mdae,
     'mpe': mpe,
     'mape': mape,
@@ -285,7 +285,7 @@ METRICS = {
     'rae': rae,
     'mrae': mrae,
     'mdrae': mdrae,
-    'gmrae': gmrae,
+    # 'gmrae': gmrae,
     'mbrae': mbrae,
     'umbrae': umbrae,
     'mda': mda,
@@ -305,3 +305,15 @@ def evaluate(actual: np.ndarray, predicted: np.ndarray, metrics=('mae', 'mse', '
 
 def evaluate_all(actual: np.ndarray, predicted: np.ndarray):
     return evaluate(actual, predicted, metrics=set(METRICS.keys()))
+
+
+def evaluate_model(list_actual: np.ndarray, list_predicted: np.ndarray, metrics=('mase', 'smape')):
+    scores = defaultdict(list)
+
+    for i in range(len(list_actual)):
+        for name in metrics:
+            scores[name].append(METRICS[name](list_actual[i], list_predicted[i]))
+    for k in scores.keys():
+        scores[k] = [np.mean(scores[k])]
+
+    return dict(scores)
