@@ -32,7 +32,7 @@ TCN_PARAMS = {
     'nb_filters': [32, 64, 128],
     'kernel_size': [2, 3, 6],
     'nb_stacks': [1, 2, 3],
-    'dilations': [[1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32]],
+    'dilations': [[1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32], [1,2,4,8,16,32,64]],
     'use_skip_connections': [False, True],
     'dropout_rate': [0, 0.15],
     'use_batch_norm': [False, True],

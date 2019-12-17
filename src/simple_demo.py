@@ -14,7 +14,7 @@ PAST_HISTORY = 144
 BATCH_SIZE = 36
 BUFFER_SIZE = 10000
 
-EPOCHS = 1
+EPOCHS = 5
 
 SEED = 1
 tf.random.set_seed(SEED)
@@ -56,11 +56,11 @@ test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(BATCH_SIZ
 
 
 # Create model
-model = simple_lstm(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
+# model = simple_lstm(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
 # model = mlp(x_train.shape, FORECAST_HORIZON, 'adam', 'mae', hidden_layers=[64,32,16])
 # model = cldnn(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
 # model = cnn(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
-# model = tcn(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
+model = tcn(x_train.shape, FORECAST_HORIZON, 'adam', 'mae')
 
 print(model.summary())
 
