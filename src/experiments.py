@@ -5,6 +5,7 @@ from tqdm import tqdm
 from src.models import lstm, cnn, mlp, cldnn, tcn
 from src.utils import auxiliary_plots, metrics
 from src.preprocessing import normalization, data_generation
+import time
 
 TRAIN_FILE_NAME = 'data/hourly_20140102_20191101_train.csv'
 TEST_FILE_NAME = 'data/hourly_20140102_20191101_test.csv'
@@ -20,38 +21,33 @@ np.random.seed(SEED)
 FORECAST_HORIZON = 24
 PAST_HISTORY = [24, 48, 72, 96, 120, 144, 168]
 
-BATCH_SIZE = [16, 36, 64, 128]
+BATCH_SIZE = [64, 128, 256]
 BUFFER_SIZE = 10000
 
-EPOCHS = [1, 25, 50, 100, 200]
+EPOCHS = [50, 100]
 
 METRICS = ['mse', 'rmse', 'nrmse', 'mae', 'mpe', 'mape', 'mdape', 'smape', 'smdape',
            'mase', 'rmspe', 'rmsse', 'mre', 'rae', 'mrae', 'std_ae', 'std_ape']
 
 TCN_PARAMS = {
     'nb_filters': [32, 64, 128],
-    'kernel_size': [2, 3, 6],
+    'kernel_size': [2, 3],
     'nb_stacks': [1, 2, 3],
-    'dilations': [[1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32], [1,2,4,8,16,32,64]],
-    'use_skip_connections': [False, True],
-    'dropout_rate': [0, 0.15],
-    'use_batch_norm': [False, True],
+    'dilations': [[1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32]],
+    'dropout_rate': [0],
 }
+
 LSTM_PARAMS = {
-    'num_stack_layers': [1, 2, 3, 4],
+    'num_stack_layers': [1, 2, 3],
     'units': [32, 64, 128],
-    'dropout': [0, 0.15]
+    'dropout': [0]
 }
 
 # Write result csv header
 with open(RESULT_FILE_NAME, 'w') as resfile:
     resfile.write(';'.join([str(a) for a in
                             ['MODEL', 'MODEL_DESCRIPTION', 'FORECAST_HORIZON', 'PAST_HISTORY', 'BATCH_SIZE', 'EPOCHS'] +
-                            METRICS +
-                            ['val_'+m for m in METRICS] +
-                            ['loss', 'val_loss']]
-                           )
-                  + "\n")
+                            METRICS + ['val_'+m for m in METRICS] + ['loss', 'val_loss']]) + "\n")
 
 # Read train file
 with open(TRAIN_FILE_NAME, 'r') as datafile:
@@ -74,6 +70,7 @@ ts_train = normalization.normalize(ts_train, norm_params)
 # Normalize test data with train params
 ts_test = normalization.normalize(ts_test, norm_params)
 
+start = time.time()
 for past_history, batch_size, epochs in tqdm(list(itertools.product(PAST_HISTORY, BATCH_SIZE, EPOCHS))):
     # Get x and y for training and validation
     x_train, y_train = data_generation.univariate_data(ts_train, 0, TRAIN_SPLIT, past_history, FORECAST_HORIZON)
@@ -99,7 +96,7 @@ for past_history, batch_size, epochs in tqdm(list(itertools.product(PAST_HISTORY
 
     evaluation_interval = int(np.ceil(x_train.shape[0] / batch_size))
 
-    for model_name, (model_function, params) in model_list.items():
+    for model_name, (model_function, params) in tqdm(model_list.items()):
         model = model_function(*params)
         print(model.summary())
 
@@ -116,9 +113,9 @@ for past_history, batch_size, epochs in tqdm(list(itertools.product(PAST_HISTORY
         # Get validation results
         val_forecast = model.predict(x_val)
         val_forecast = normalization.denormalize(val_forecast, norm_params)
-        y_val = normalization.denormalize(y_val, norm_params)
+        y_val_denormalized = normalization.denormalize(y_val, norm_params)
 
-        val_metrics = metrics.evaluate(y_val, val_forecast, METRICS)
+        val_metrics = metrics.evaluate(y_val_denormalized, val_forecast, METRICS)
         print('Validation metrics', val_metrics)
 
         # TEST
@@ -126,15 +123,15 @@ for past_history, batch_size, epochs in tqdm(list(itertools.product(PAST_HISTORY
         test_forecast = model.predict(test_data)
 
         test_forecast = normalization.denormalize(test_forecast, norm_params)
-        y_test = normalization.denormalize(y_test, norm_params)
-        x_test = normalization.denormalize(x_test, norm_params)
+        y_test_denormalized = normalization.denormalize(y_test, norm_params)
+        x_test_denormalized = normalization.denormalize(x_test, norm_params)
 
-        test_metrics = metrics.evaluate(y_test, test_forecast, METRICS)
+        test_metrics = metrics.evaluate(y_test_denormalized, test_forecast, METRICS)
         print('Test scores', test_metrics)
 
         # Plot some test predictions
         if SHOW_PLOTS:
-            auxiliary_plots.plot_ts_forecasts(x_test, y_test, test_forecast)
+            auxiliary_plots.plot_ts_forecasts(x_test_denormalized, y_test_denormalized, test_forecast)
 
         # Save results
         val_metrics = {'val_' + k: val_metrics[k] for k in val_metrics}
@@ -152,4 +149,5 @@ for past_history, batch_size, epochs in tqdm(list(itertools.product(PAST_HISTORY
         with open(RESULT_FILE_NAME, 'a') as resfile:
             resfile.write(';'.join([str(a) for a in model_metric.values()]) + "\n")
 
-
+end = time.time()
+print(end - start)

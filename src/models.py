@@ -80,7 +80,7 @@ def cnn(input_shape, output_size=1, optimizer='adam', loss='mae'):
 
 
 def tcn(input_shape, output_size=1, optimizer='adam', loss='mae', nb_filters=64, kernel_size=2, nb_stacks=1,
-        dilations=[1, 2, 4, 8, 16, 32], use_skip_connections=True, dropout_rate=0, use_batch_norm=False, activation='linear',):
+        dilations=[1, 2, 4, 8, 16, 32], dropout_rate=0, use_skip_connections=True, use_batch_norm=False, activation='linear',):
     inputs = tf.keras.layers.Input(shape=input_shape[-2:])
 
     x = TCN(nb_filters=nb_filters, kernel_size=kernel_size, nb_stacks=nb_stacks, dilations=dilations,
