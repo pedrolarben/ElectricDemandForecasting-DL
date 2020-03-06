@@ -92,6 +92,10 @@ def mae(actual: np.ndarray, predicted: np.ndarray):
     """ Mean Absolute Error """
     return np.mean(np.abs(_error(actual, predicted)))
 
+def wape(actual: np.ndarray, predicted: np.ndarray):
+    """ Weighted Absolute Percentage Error """
+    return mae(actual, predicted)/np.mean(actual)
+
 
 mad = mae  # Mean Absolute Deviation (it is the same as MAE)
 
@@ -219,7 +223,8 @@ def rrse(actual: np.ndarray, predicted: np.ndarray):
 
 def mre(actual: np.ndarray, predicted: np.ndarray, benchmark: np.ndarray = None):
     """ Mean Relative Error """
-    return np.mean(_relative_error(actual, predicted, benchmark))
+    return np.mean(np.abs(_error(actual, predicted))/actual)
+    # return np.mean(_relative_error(actual, predicted, benchmark))
 
 
 def rae(actual: np.ndarray, predicted: np.ndarray):
@@ -264,6 +269,7 @@ METRICS = {
     'nrmse': nrmse,
     'me': me,
     'mae': mae,
+    'wape': wape,
     'mad': mad,
     # 'gmae': gmae,
     'mdae': mdae,

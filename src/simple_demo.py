@@ -66,7 +66,6 @@ print(model.summary())
 
 evaluation_interval = int(np.ceil(x_train.shape[0] / BATCH_SIZE))
 # Train the model
-# TODO: Callbacks
 history = model.fit(train_data, epochs=EPOCHS,
                       steps_per_epoch=evaluation_interval,
                       validation_data=val_data, validation_steps=evaluation_interval)
