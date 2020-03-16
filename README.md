@@ -9,4 +9,4 @@ We have conducted experiments for energy-related time series forecasting with di
 
 Both datasets can be found at [Red Electrica de España (REE)](https://www.ree.es/en/datos/todate). 
 
-For the TCN implementation, [@philipperemy](https://github.com/philipperemy) library have been used [https://github.com/philipperemy/keras-tcn](https://github.com/philipperemy/keras-tcn).
+For the TCN implementation, [@philipperemy](https://github.com/philipperemy) library has been used [https://github.com/philipperemy/keras-tcn](https://github.com/philipperemy/keras-tcn).
